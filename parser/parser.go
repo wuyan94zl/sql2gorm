@@ -2,11 +2,11 @@ package parser
 
 import (
 	"fmt"
-	"github.com/jinzhu/inflection"
 	"github.com/blastrain/vitess-sqlparser/tidbparser/ast"
 	"github.com/blastrain/vitess-sqlparser/tidbparser/dependency/mysql"
 	"github.com/blastrain/vitess-sqlparser/tidbparser/dependency/types"
 	"github.com/blastrain/vitess-sqlparser/tidbparser/parser"
+	"github.com/jinzhu/inflection"
 	"github.com/pkg/errors"
 	"go/format"
 	"io"
@@ -30,10 +30,15 @@ var acronym = map[string]struct{}{
 	"RPC": {},
 }
 
+type StructCode struct {
+	Code  string
+	Table string
+}
+
 type ModelCodes struct {
 	Package    string
 	ImportPath []string
-	StructCode []string
+	StructCode []StructCode
 }
 
 func ParseSql(sql string, options ...Option) (ModelCodes, error) {
@@ -44,15 +49,15 @@ func ParseSql(sql string, options ...Option) (ModelCodes, error) {
 	if err != nil {
 		return ModelCodes{}, err
 	}
-	tableStr := make([]string, 0, len(stmts))
+	tableStr := make([]StructCode, 0, len(stmts))
 	importPath := make(map[string]struct{})
 	for _, stmt := range stmts {
 		if ct, ok := stmt.(*ast.CreateTableStmt); ok {
-			s, ipt, err := makeCode(ct, opt)
+			s, ipt, table, err := makeCode(ct, opt)
 			if err != nil {
 				return ModelCodes{}, err
 			}
-			tableStr = append(tableStr, s)
+			tableStr = append(tableStr, StructCode{Code: s, Table: table})
 			for _, s := range ipt {
 				importPath[s] = struct{}{}
 			}
@@ -104,7 +109,7 @@ type tmplField struct {
 	Comment string
 }
 
-func makeCode(stmt *ast.CreateTableStmt, opt options) (string, []string, error) {
+func makeCode(stmt *ast.CreateTableStmt, opt options) (string, []string, string, error) {
 	importPath := make([]string, 0, 1)
 	data := tmplData{
 		TableName:    stmt.Table.Name.String(),
@@ -220,13 +225,13 @@ func makeCode(stmt *ast.CreateTableStmt, opt options) (string, []string, error) 
 	builder := strings.Builder{}
 	err := structTmpl.Execute(&builder, data)
 	if err != nil {
-		return "", nil, err
+		return "", nil, "", err
 	}
 	code, err := format.Source([]byte(builder.String()))
 	if err != nil {
-		return string(code), importPath, errors.WithMessage(err, "format golang code error")
+		return string(code), importPath, "", errors.WithMessage(err, "format golang code error")
 	}
-	return string(code), importPath, nil
+	return string(code), importPath, data.TableName, nil
 }
 
 func mysqlToGoType(colTp *types.FieldType, style NullStyle) (name string, path string) {

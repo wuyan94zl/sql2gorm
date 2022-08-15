@@ -93,7 +93,7 @@ func TestParseSql1(t *testing.T) {
 		//t.Log(data.StructCode)
 		//t.Log(data.ImportPath)
 		if assert.Equal(t, 1, len(data.StructCode)) {
-			lines := strings.Split(strings.TrimSpace(data.StructCode[0]), "\n")
+			lines := strings.Split(strings.TrimSpace(data.StructCode[0].Code), "\n")
 			if assert.Equal(t, 3, len(lines)) {
 				assert.Equal(t, test[1], strings.TrimSpace(lines[1]))
 			}
