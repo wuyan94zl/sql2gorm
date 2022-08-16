@@ -1,4 +1,4 @@
-module github.com/cascax/sql2gorm
+module github.com/wuyan94zl/sql2gorm
 
 go 1.13
 
