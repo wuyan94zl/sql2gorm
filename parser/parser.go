@@ -136,9 +136,23 @@ func makeCode(stmt *ast.CreateTableStmt, opt options) (string, []string, string,
 	}
 
 	isPrimaryKey := make(map[string]bool)
+	hasTag := make(map[string]string)
 	for _, con := range stmt.Constraints {
-		if con.Tp == ast.ConstraintPrimaryKey {
+		switch con.Tp {
+		case ast.ConstraintPrimaryKey:
 			isPrimaryKey[con.Keys[0].Column.String()] = true
+		case ast.ConstraintUniq:
+			if len(con.Keys) > 1 {
+				for _, v := range con.Keys {
+					hasTag[v.Column.String()] = ";uniqueIndex:" + con.Name
+				}
+			} else {
+				hasTag[con.Keys[0].Column.String()] = ";unique:" + con.Name
+			}
+		case ast.ConstraintIndex:
+			for _, v := range con.Keys {
+				hasTag[v.Column.String()] = ";index:" + con.Name
+			}
 		}
 	}
 
@@ -165,6 +179,9 @@ func makeCode(stmt *ast.CreateTableStmt, opt options) (string, []string, string,
 		}
 		if isPrimaryKey[colName] {
 			gormTag.WriteString(";primary_key")
+		}
+		if index, ok := hasTag[colName]; ok && opt.IndexTag {
+			gormTag.WriteString(index)
 		}
 		isNotNull := false
 		canNull := false
