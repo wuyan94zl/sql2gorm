@@ -115,6 +115,7 @@ func makeCode(stmt *ast.CreateTableStmt, opt options) (string, []string, string,
 		TableName:    stmt.Table.Name.String(),
 		RawTableName: stmt.Table.Name.String(),
 		Fields:       make([]tmplField, 0, 1),
+		NameFunc:     true,
 	}
 	tablePrefix := opt.TablePrefix
 	if tablePrefix != "" && strings.HasPrefix(data.TableName, tablePrefix) {
@@ -210,6 +211,7 @@ func makeCode(stmt *ast.CreateTableStmt, opt options) (string, []string, string,
 			case ast.ColumnOptionFulltext:
 			case ast.ColumnOptionComment:
 				field.Comment = o.Expr.GetDatum().GetString()
+				gormTag.WriteString(";comment:" + field.Comment)
 			default:
 				//return "", nil, errors.Errorf(" unsupport option %d\n", o.Tp)
 			}
