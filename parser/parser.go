@@ -25,9 +25,9 @@ var (
 )
 
 var acronym = map[string]struct{}{
-	"ID":  {},
-	"IP":  {},
-	"RPC": {},
+	//"ID":  {},
+	//"IP":  {},
+	//"RPC": {},
 }
 
 type StructCode struct {
