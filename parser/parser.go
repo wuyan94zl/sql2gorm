@@ -218,6 +218,10 @@ func makeCode(stmt *ast.CreateTableStmt, opt options) (string, []string, string,
 		}
 		if !isPrimaryKey[colName] && isNotNull {
 			gormTag.WriteString(";NOT NULL")
+		} else {
+			if col.Tp.Tp == mysql.TypeTimestamp {
+				gormTag.WriteString(";NULL")
+			}
 		}
 		tags = append(tags, "gorm", gormTag.String())
 
@@ -232,7 +236,7 @@ func makeCode(stmt *ast.CreateTableStmt, opt options) (string, []string, string,
 		if !canNull {
 			nullStyle = NullDisable
 		}
-		goType, pkg := mysqlToGoType(col.Tp, nullStyle)
+		goType, pkg := mysqlToGoType(col.Tp, nullStyle, isNotNull)
 		if pkg != "" {
 			importPath = append(importPath, pkg)
 		}
@@ -253,29 +257,31 @@ func makeCode(stmt *ast.CreateTableStmt, opt options) (string, []string, string,
 	return string(code), importPath, data.TableName, nil
 }
 
-func mysqlToGoType(colTp *types.FieldType, style NullStyle) (name string, path string) {
-	//if style == NullInSql {
-	//	path = "database/sql"
-	//	switch colTp.Tp {
-	//	case mysql.TypeTiny, mysql.TypeShort, mysql.TypeInt24, mysql.TypeLong:
-	//		name = "sql.NullInt32"
-	//	case mysql.TypeLonglong:
-	//		name = "sql.NullInt64"
-	//	case mysql.TypeFloat, mysql.TypeDouble:
-	//		name = "sql.NullFloat64"
-	//	case mysql.TypeString, mysql.TypeVarchar, mysql.TypeVarString,
-	//		mysql.TypeBlob, mysql.TypeTinyBlob, mysql.TypeMediumBlob, mysql.TypeLongBlob:
-	//		name = "sql.NullString"
-	//	case mysql.TypeTimestamp, mysql.TypeDatetime, mysql.TypeDate:
-	//		name = "sql.NullTime"
-	//	case mysql.TypeDecimal, mysql.TypeNewDecimal:
-	//		name = "sql.NullString"
-	//	case mysql.TypeJSON:
-	//		name = "sql.NullString"
-	//	default:
-	//		return "UnSupport", ""
-	//	}
-	//} else {
+func mysqlToGoType(colTp *types.FieldType, style NullStyle, isNotNull bool) (name string, path string) {
+	if !isNotNull {
+		switch colTp.Tp {
+		//case mysql.TypeTiny, mysql.TypeShort, mysql.TypeInt24, mysql.TypeLong:
+		//	name = "sql.NullInt32"
+		//case mysql.TypeLonglong:
+		//	name = "sql.NullInt64"
+		//case mysql.TypeFloat, mysql.TypeDouble:
+		//	name = "sql.NullFloat64"
+		//case mysql.TypeString, mysql.TypeVarchar, mysql.TypeVarString,
+		//	mysql.TypeBlob, mysql.TypeTinyBlob, mysql.TypeMediumBlob, mysql.TypeLongBlob:
+		//	name = "sql.NullString"
+		//case mysql.TypeDecimal, mysql.TypeNewDecimal:
+		//	name = "sql.NullString"
+		//case mysql.TypeJSON:
+		//	name = "sql.NullString"
+		case mysql.TypeTimestamp, mysql.TypeDatetime, mysql.TypeDate:
+			path = "database/sql"
+			name = "sql.NullTime"
+			return
+			//default:
+			//	return "UnSupport", ""
+		}
+	}
+	//else {
 	switch colTp.Tp {
 	case mysql.TypeTiny, mysql.TypeShort, mysql.TypeInt24, mysql.TypeLong:
 		if mysql.HasUnsignedFlag(colTp.Flag) {

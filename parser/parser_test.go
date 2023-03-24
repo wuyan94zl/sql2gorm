@@ -51,16 +51,21 @@ var testData = [][]string{
 
 func TestParseSql(t *testing.T) {
 	sql := `CREATE TABLE t_person_info (
- age INT(11) unsigned NULL,
  id BIGINT(11) PRIMARY KEY AUTO_INCREMENT NOT NULL COMMENT '这是id',
+ age INT(11) unsigned NULL,
+ score INT(11) NOT NULL,
  name VARCHAR(30) NOT NULL DEFAULT 'default_name' COMMENT '这是名字',
- created_at datetime NULL DEFAULT NULL,
+ email VARCHAR(30) NULL COMMENT '这是邮箱',
+ created_at datetime DEFAULT NULL,
+ updated_at datetime NOT NULL,
  sex VARCHAR(2) NULL,
  num INT(11) DEFAULT 3 NULL,
  gmv decimal(20,8) DEFAULT NULL,
- comment TEXT
+ comment TEXT,
+ reg_at     datetime NOT NULL,
+ login_at timestamp NULL DEFAULT NULL
  ) COMMENT="person info";`
-	data, err := ParseSql(sql, WithTablePrefix("t_"), WithJsonTag())
+	data, err := ParseSql(sql, WithTablePrefix("t_"), WithNoNullType(), WithGormType(), WithIndex(), WithJsonTag())
 	fmt.Println(data, err)
 	assert.Nil(t, err)
 	for _, s := range data.StructCode {
