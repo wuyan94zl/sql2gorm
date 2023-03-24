@@ -45,21 +45,24 @@ var testData = [][]string{
 
 //func TestParseSql(t *testing.T) {
 //	sql := `CREATE TABLE t_person_info (
-//  age INT(11) unsigned NULL,
-//  id BIGINT(11) PRIMARY KEY AUTO_INCREMENT NOT NULL COMMENT '这是id',
-//  name VARCHAR(30) NOT NULL DEFAULT 'default_name' COMMENT '这是名字',
-//  created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-//  sex VARCHAR(2) NULL,
-//  num INT(11) DEFAULT 3 NULL,
-//  comment TEXT
-//  ) COMMENT="person info";`
+// age INT(11) unsigned NULL,
+// id BIGINT(11) PRIMARY KEY AUTO_INCREMENT NOT NULL COMMENT '这是id',
+// name VARCHAR(30) NOT NULL DEFAULT 'default_name' COMMENT '这是名字',
+// created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+// sex VARCHAR(2) NULL,
+// num INT(11) DEFAULT 3 NULL,
+// gmv decimal(20,8) DEFAULT NULL,
+// comment TEXT
+// ) COMMENT="person info";`
 //	data, err := ParseSql(sql, WithTablePrefix("t_"), WithJsonTag())
+//	fmt.Println(data, err)
 //	assert.Nil(t, err)
 //	for _, s := range data.StructCode {
 //		t.Log(s)
 //	}
 //	t.Log(data.ImportPath)
 //}
+
 //
 //func TestParseSqlToWrite(t *testing.T) {
 //	sql := `CREATE TABLE IF NOT EXISTS t_person_info (

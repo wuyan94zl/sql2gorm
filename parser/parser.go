@@ -298,7 +298,8 @@ func mysqlToGoType(colTp *types.FieldType, style NullStyle) (name string, path s
 			path = "time"
 			name = "time.Time"
 		case mysql.TypeDecimal, mysql.TypeNewDecimal:
-			name = "string"
+			path = "github.com/shopspring/decimal"
+			name = "decimal.Decimal"
 		case mysql.TypeJSON:
 			name = "string"
 		default:
