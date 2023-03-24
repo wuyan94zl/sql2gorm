@@ -254,61 +254,61 @@ func makeCode(stmt *ast.CreateTableStmt, opt options) (string, []string, string,
 }
 
 func mysqlToGoType(colTp *types.FieldType, style NullStyle) (name string, path string) {
-	if style == NullInSql {
-		path = "database/sql"
-		switch colTp.Tp {
-		case mysql.TypeTiny, mysql.TypeShort, mysql.TypeInt24, mysql.TypeLong:
-			name = "sql.NullInt32"
-		case mysql.TypeLonglong:
-			name = "sql.NullInt64"
-		case mysql.TypeFloat, mysql.TypeDouble:
-			name = "sql.NullFloat64"
-		case mysql.TypeString, mysql.TypeVarchar, mysql.TypeVarString,
-			mysql.TypeBlob, mysql.TypeTinyBlob, mysql.TypeMediumBlob, mysql.TypeLongBlob:
-			name = "sql.NullString"
-		case mysql.TypeTimestamp, mysql.TypeDatetime, mysql.TypeDate:
-			name = "sql.NullTime"
-		case mysql.TypeDecimal, mysql.TypeNewDecimal:
-			name = "sql.NullString"
-		case mysql.TypeJSON:
-			name = "sql.NullString"
-		default:
-			return "UnSupport", ""
+	//if style == NullInSql {
+	//	path = "database/sql"
+	//	switch colTp.Tp {
+	//	case mysql.TypeTiny, mysql.TypeShort, mysql.TypeInt24, mysql.TypeLong:
+	//		name = "sql.NullInt32"
+	//	case mysql.TypeLonglong:
+	//		name = "sql.NullInt64"
+	//	case mysql.TypeFloat, mysql.TypeDouble:
+	//		name = "sql.NullFloat64"
+	//	case mysql.TypeString, mysql.TypeVarchar, mysql.TypeVarString,
+	//		mysql.TypeBlob, mysql.TypeTinyBlob, mysql.TypeMediumBlob, mysql.TypeLongBlob:
+	//		name = "sql.NullString"
+	//	case mysql.TypeTimestamp, mysql.TypeDatetime, mysql.TypeDate:
+	//		name = "sql.NullTime"
+	//	case mysql.TypeDecimal, mysql.TypeNewDecimal:
+	//		name = "sql.NullString"
+	//	case mysql.TypeJSON:
+	//		name = "sql.NullString"
+	//	default:
+	//		return "UnSupport", ""
+	//	}
+	//} else {
+	switch colTp.Tp {
+	case mysql.TypeTiny, mysql.TypeShort, mysql.TypeInt24, mysql.TypeLong:
+		if mysql.HasUnsignedFlag(colTp.Flag) {
+			name = "uint"
+		} else {
+			name = "int"
 		}
-	} else {
-		switch colTp.Tp {
-		case mysql.TypeTiny, mysql.TypeShort, mysql.TypeInt24, mysql.TypeLong:
-			if mysql.HasUnsignedFlag(colTp.Flag) {
-				name = "uint"
-			} else {
-				name = "int"
-			}
-		case mysql.TypeLonglong:
-			if mysql.HasUnsignedFlag(colTp.Flag) {
-				name = "uint64"
-			} else {
-				name = "int64"
-			}
-		case mysql.TypeFloat, mysql.TypeDouble:
-			name = "float64"
-		case mysql.TypeString, mysql.TypeVarchar, mysql.TypeVarString,
-			mysql.TypeBlob, mysql.TypeTinyBlob, mysql.TypeMediumBlob, mysql.TypeLongBlob:
-			name = "string"
-		case mysql.TypeTimestamp, mysql.TypeDatetime, mysql.TypeDate:
-			path = "time"
-			name = "time.Time"
-		case mysql.TypeDecimal, mysql.TypeNewDecimal:
-			path = "github.com/shopspring/decimal"
-			name = "decimal.Decimal"
-		case mysql.TypeJSON:
-			name = "string"
-		default:
-			return "UnSupport", ""
+	case mysql.TypeLonglong:
+		if mysql.HasUnsignedFlag(colTp.Flag) {
+			name = "uint64"
+		} else {
+			name = "int64"
 		}
-		if style == NullInPointer {
-			name = "*" + name
-		}
+	case mysql.TypeFloat, mysql.TypeDouble:
+		name = "float64"
+	case mysql.TypeString, mysql.TypeVarchar, mysql.TypeVarString,
+		mysql.TypeBlob, mysql.TypeTinyBlob, mysql.TypeMediumBlob, mysql.TypeLongBlob:
+		name = "string"
+	case mysql.TypeTimestamp, mysql.TypeDatetime, mysql.TypeDate:
+		path = "time"
+		name = "time.Time"
+	case mysql.TypeDecimal, mysql.TypeNewDecimal:
+		path = "github.com/shopspring/decimal"
+		name = "decimal.Decimal"
+	case mysql.TypeJSON:
+		name = "string"
+	default:
+		return "UnSupport", ""
 	}
+	if style == NullInPointer {
+		name = "*" + name
+	}
+	//}
 	return
 }
 
